@@ -3,6 +3,7 @@ package dynamodb
 import (
 	"testing"
 
+	"github.com/ace-teknologi/memzy"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
@@ -33,12 +34,19 @@ var (
 	}
 )
 
+func TestIterImplementsMemzy(t *testing.T) {
+	i := &Iter{}
+	if _, ok := interface{}(i).(memzy.Iter); !ok {
+		t.Errorf("Iter does not implement memzy.Iter")
+	}
+}
+
 func TestIter_singlePage(t *testing.T) {
 	c := testClient("single-page-test-table")
 
 	mock.ExpectScan().Table("single-page-test-table").WillReturns(singlePageResponse)
 
-	it := NewIter(c)
+	it := c.NewIter().(*Iter)
 	if it.err != nil {
 		t.Error(it.err)
 	}
@@ -54,7 +62,7 @@ func TestIter_multiPage(t *testing.T) {
 	mock.ExpectScan().Table("multi-page-test-table").WillReturns(multiPageResponse)
 	mock.ExpectScan().Table("multi-page-test-table").WillReturns(singlePageResponse)
 
-	it := NewIter(c)
+	it := c.NewIter().(*Iter)
 	if it.err != nil {
 		t.Error(it.err)
 	}
@@ -75,16 +83,25 @@ func TestIter_multiPage(t *testing.T) {
 func TestIter_nullClient(t *testing.T) {
 	var c *Client
 
-	it := NewIter(c)
+	it := c.NewIter()
 	if it.Err() != ErrNullClient {
 		t.Errorf("Expected a null client error, got %v", it.Err())
 	}
 }
 
+type TestObject struct {
+	Beer    string `json:"beer"`
+	Whiskey string `json:"whiskey"`
+}
+
 func testBeer(it *Iter, t *testing.T) {
-	beer := *it.Current()["beer"].S
-	if beer != "yum" {
-		t.Errorf("Expected beer to be yum, but it was %v", beer)
+	var beer TestObject
+	err := it.Current(&beer)
+	if err != nil {
+		t.Error(err)
+	}
+	if beer.Beer != "yum" {
+		t.Errorf("Expected beer to be yum, but it was %v", beer.Beer)
 	}
 }
 
@@ -99,9 +116,13 @@ func testFinished(it *Iter, t *testing.T) {
 }
 
 func testWhiskey(it *Iter, t *testing.T) {
-	whiskey := *it.Current()["whiskey"].S
-	if whiskey != "yum" {
-		t.Errorf("Expected whiskey to be yum, but it was %v", whiskey)
+	var whiskey TestObject
+	err := it.Current(&whiskey)
+	if err != nil {
+		t.Error(err)
+	}
+	if whiskey.Whiskey != "yum" {
+		t.Errorf("Expected whiskey to be yum, but it was %v", whiskey.Whiskey)
 	}
 }
 

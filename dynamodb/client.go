@@ -66,8 +66,3 @@ func (c *Client) PutItem(v interface{}) error {
 	})
 	return err
 }
-
-// RetrieveAll returns a pointer to an Iter
-func (c *Client) RetrieveAll() *Iter {
-	return NewIter(c)
-}

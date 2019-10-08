@@ -3,7 +3,9 @@ package dynamodb
 import (
 	"fmt"
 
+	"github.com/ace-teknologi/memzy"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 var (
@@ -24,9 +26,9 @@ type Iter struct {
 	values       []map[string]*dynamodb.AttributeValue
 }
 
-// NewIter returns a pointer to an Iter for the client provided. It performs
-// an initial scan to populate the first page, and stores the next key to scan.
-func NewIter(c *Client) *Iter {
+// NewIter returns a pointer to an Iter. It also performs an initial scan so it
+// is ready to go, this probably should be avoided.
+func (c *Client) NewIter(args ...interface{}) memzy.Iter {
 	// Ensure we didn't get a null client
 	if c == nil {
 		return &Iter{
@@ -34,9 +36,7 @@ func NewIter(c *Client) *Iter {
 		}
 	}
 
-	it := &Iter{
-		c: c,
-	}
+	it := &Iter{c: c}
 
 	it.getNextPage()
 
@@ -44,8 +44,8 @@ func NewIter(c *Client) *Iter {
 }
 
 // Current returns the most recent item visited by a call to Next.
-func (it *Iter) Current() map[string]*dynamodb.AttributeValue {
-	return it.cur
+func (it *Iter) Current(v interface{}) error {
+	return dynamodbattribute.UnmarshalMap(it.cur, v)
 }
 
 // Err returns the error, if any, that caused the Iter to stop. It must be

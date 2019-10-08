@@ -2,6 +2,8 @@ package memory
 
 import (
 	"testing"
+
+	"github.com/ace-teknologi/memzy"
 )
 
 type testObject struct {
@@ -81,5 +83,12 @@ func TestStorePutItemBad(t *testing.T) {
 			t.Errorf("Expected an error, got none")
 			return
 		}
+	}
+}
+
+func TestStoreImplementsMemzy(t *testing.T) {
+	m := NewStore("ImplementsMemzy")
+	if _, ok := interface{}(m).(memzy.Memzy); !ok {
+		t.Errorf("Store does not implement memzy.Memzy")
 	}
 }

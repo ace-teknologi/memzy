@@ -3,6 +3,7 @@ package dynamodb
 import (
 	"testing"
 
+	"github.com/ace-teknologi/memzy"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
@@ -94,5 +95,12 @@ func TestPutItem(t *testing.T) {
 	err := c.PutItem(obj)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestStoreImplementsMemzy(t *testing.T) {
+	c := testClient("ImplementsMemzy")
+	if _, ok := interface{}(c).(memzy.Memzy); !ok {
+		t.Errorf("Client does not implement memzy.Memzy")
 	}
 }
