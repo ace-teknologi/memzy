@@ -7,6 +7,10 @@
 
 A simple object persistance inferface for golang.
 
+## Minimum requirements
+
+go 1.13.x
+
 ## Usage
 
 Prequisite: add json tags to any objects you want to store.
