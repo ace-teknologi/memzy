@@ -7,13 +7,13 @@ import (
 )
 
 type testObject struct {
-	MegaID     string
-	MegaAge    int
-	MegaColour string
+	MegaID     string `json:"megaID"`
+	MegaAge    int    `json:"megaAge"`
+	MegaColour string `json:"megaColour"`
 }
 
 func TestStorePutThenGetItem(t *testing.T) {
-	s := NewStore("MegaID")
+	s := NewStore("megaID")
 	obj := &testObject{
 		MegaID:     "123",
 		MegaAge:    27,
@@ -27,12 +27,12 @@ func TestStorePutThenGetItem(t *testing.T) {
 
 	newObj := &testObject{}
 
-	err = s.GetItem(newObj, map[string]interface{}{"MegaID": "123"})
+	err = s.GetItem(newObj, map[string]interface{}{"megaID": "123"})
 	if err != nil {
 		t.Errorf("Unable to get item: %v", err)
 	}
 
-	err = s.GetItem(newObj, map[string]interface{}{"MegaID": "456"})
+	err = s.GetItem(newObj, map[string]interface{}{"megaID": "456"})
 	if err == nil {
 		t.Errorf("Expected an error")
 	}

@@ -14,7 +14,7 @@ func TestIterImplementsMemzy(t *testing.T) {
 }
 
 func TestIter(t *testing.T) {
-	s := NewStore("MegaID")
+	s := NewStore("megaID")
 	s.PutItem(&testObject{
 		MegaID:     "1",
 		MegaAge:    27,
