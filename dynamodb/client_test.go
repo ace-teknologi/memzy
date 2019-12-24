@@ -10,6 +10,8 @@ import (
 	dynamock "github.com/gusaul/go-dynamock"
 )
 
+const testTableName = "test-table"
+
 var (
 	mock *dynamock.DynaMock
 	svc  dynamodbiface.DynamoDBAPI
@@ -33,8 +35,8 @@ type MegaTest struct {
 }
 
 func TestNew(t *testing.T) {
-	c := testClient("test-table")
-	if *c.TableName != "test-table" {
+	c := testClient(testTableName)
+	if *c.TableName != testTableName {
 		t.Errorf("Expected test-table, got %s", *c.TableName)
 	}
 }
@@ -58,12 +60,12 @@ func mockGetItem() {
 			S: aws.String("ABC"),
 		},
 	}
-	mock.ExpectGetItem().ToTable("test-table").WithKeys(key).WillReturns(res)
+	mock.ExpectGetItem().ToTable(testTableName).WithKeys(key).WillReturns(res)
 }
 
 func TestGetItem(t *testing.T) {
 	mockGetItem()
-	c := testClient("test-table")
+	c := testClient(testTableName)
 	obj := &MegaTest{}
 
 	err := c.GetItem(obj, map[string]interface{}{"MegaString": "ABC"})
@@ -85,12 +87,12 @@ func TestGetItem(t *testing.T) {
 }
 
 func TestPutItem(t *testing.T) {
-	c := testClient("test-table")
+	c := testClient(testTableName)
 
 	obj := MegaTest{"test", true, 3}
 
 	res := dynamodb.PutItemOutput{}
-	mock.ExpectPutItem().ToTable("test-table").WillReturns(res)
+	mock.ExpectPutItem().ToTable(testTableName).WillReturns(res)
 
 	err := c.PutItem(obj)
 	if err != nil {
