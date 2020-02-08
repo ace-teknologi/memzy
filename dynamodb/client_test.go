@@ -10,6 +10,8 @@ import (
 	dynamock "github.com/gusaul/go-dynamock"
 )
 
+const testTableName = "test-table"
+
 var (
 	mock *dynamock.DynaMock
 	svc  dynamodbiface.DynamoDBAPI
@@ -33,8 +35,8 @@ type MegaTest struct {
 }
 
 func TestNew(t *testing.T) {
-	c := testClient("test-table")
-	if *c.TableName != "test-table" {
+	c := testClient(testTableName)
+	if *c.TableName != testTableName {
 		t.Errorf("Expected test-table, got %s", *c.TableName)
 	}
 }
@@ -58,6 +60,16 @@ func mockGetItem() {
 			S: aws.String("ABC"),
 		},
 	}
+	mock.ExpectGetItem().ToTable(testTableName).WithKeys(key).WillReturns(res)
+}
+
+func mockMissingItem() {
+	res := dynamodb.GetItemOutput{}
+	key := map[string]*dynamodb.AttributeValue{
+		"MegaString": {
+			S: aws.String("missing"),
+		},
+	}
 	mock.ExpectGetItem().ToTable("test-table").WithKeys(key).WillReturns(res)
 }
 
@@ -73,7 +85,7 @@ func mockMissingItem() {
 
 func TestGetItem(t *testing.T) {
 	mockGetItem()
-	c := testClient("test-table")
+	c := testClient(testTableName)
 	obj := &MegaTest{}
 
 	err := c.GetItem(obj, map[string]interface{}{"MegaString": "ABC"})
@@ -109,10 +121,21 @@ func TestGetMissingItem(t *testing.T) {
 func TestPutItem(t *testing.T) {
 	c := testClient("test-table")
 
+	obj := &MegaTest{}
+
+	err := c.GetItem(obj, map[string]interface{}{"MegaString": "missing"})
+	if err == nil || err != ErrNotFound {
+		t.Errorf("Expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestPutItem(t *testing.T) {
+	c := testClient(testTableName)
+
 	obj := MegaTest{"test", true, 3}
 
 	res := dynamodb.PutItemOutput{}
-	mock.ExpectPutItem().ToTable("test-table").WillReturns(res)
+	mock.ExpectPutItem().ToTable(testTableName).WillReturns(res)
 
 	err := c.PutItem(obj)
 	if err != nil {

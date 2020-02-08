@@ -3,7 +3,6 @@ package memory
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/ace-teknologi/memzy"
 )
@@ -53,24 +52,19 @@ func (s *Store) GetItem(v interface{}, key map[string]interface{}) error {
 
 // PutItem stores an item
 func (s *Store) PutItem(v interface{}) error {
-	obj := reflect.Indirect(reflect.ValueOf(v))
-	if t := obj.Kind(); t != reflect.Struct {
-		return fmt.Errorf("Cannot put invalid type %v", t)
-	}
-
-	key := obj.FieldByName(s.key)
-	if key.Kind() == reflect.Invalid {
-		return fmt.Errorf("Your object does not contain the primary key for this store")
-	}
-	if key.String() == "" {
-		return fmt.Errorf("Cannot put item with blank primary key")
-	}
-
+	// Turn it into a map[string]interface{} so we can check if the primary key is there
+	var m map[string]interface{}
 	bytes, err := json.Marshal(v)
 	if err != nil {
-		return err
+		return fmt.Errorf("Could not convert item to JSON: %w", err)
+	}
+	json.Unmarshal(bytes, &m)
+
+	key, ok := m[s.key]
+	if !ok {
+		return fmt.Errorf("Your object does not contain the primary key for this store (%v)", s.key)
 	}
 
-	s.m[key.String()] = bytes
+	s.m[key.(string)] = bytes
 	return nil
 }
