@@ -103,7 +103,7 @@ func TestGetMissingItem(t *testing.T) {
 	obj := &MegaTest{}
 
 	err := c.GetItem(obj, map[string]interface{}{"MegaString": "missing"})
-	if err == nil || err != ErrNotFound {
+	if err == nil || err != memzy.ErrNotFound {
 		t.Errorf("Expected ErrNotFound, got %v", err)
 	}
 }

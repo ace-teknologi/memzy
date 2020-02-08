@@ -3,6 +3,8 @@ package memory
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/ace-teknologi/memzy"
 )
 
 // Store provides a key-value store in memory.
@@ -42,7 +44,7 @@ func (s *Store) GetItem(v interface{}, key map[string]interface{}) error {
 	}
 
 	if len(bytes) == 0 {
-		return fmt.Errorf("Could not find %v in memory", keyStr)
+		return memzy.ErrNotFound
 	}
 
 	return json.Unmarshal(bytes, v)
