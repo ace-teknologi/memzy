@@ -61,6 +61,16 @@ func mockGetItem() {
 	mock.ExpectGetItem().ToTable("test-table").WithKeys(key).WillReturns(res)
 }
 
+func mockMissingItem() {
+	res := dynamodb.GetItemOutput{}
+	key := map[string]*dynamodb.AttributeValue{
+		"MegaString": {
+			S: aws.String("missing"),
+		},
+	}
+	mock.ExpectGetItem().ToTable("test-table").WithKeys(key).WillReturns(res)
+}
+
 func TestGetItem(t *testing.T) {
 	mockGetItem()
 	c := testClient("test-table")
