@@ -9,8 +9,7 @@ env:
 os:
   - linux
 
-dist: trusty
-sudo: false
+dist: bionic
 
 install: false
 
