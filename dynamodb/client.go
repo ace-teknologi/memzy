@@ -45,6 +45,10 @@ func (c *Client) GetItem(v interface{}, key map[string]interface{}) error {
 		return fmt.Errorf("Could not GetItem from DynamoDB: %v", err)
 	}
 
+	if out.Item == nil {
+		return ErrNotFound
+	}
+
 	err = dynamodbattribute.UnmarshalMap(out.Item, v)
 	if err != nil {
 		return fmt.Errorf("Could not unmarshal: %v", err)
