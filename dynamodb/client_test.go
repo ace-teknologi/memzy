@@ -63,6 +63,16 @@ func mockGetItem() {
 	mock.ExpectGetItem().ToTable(testTableName).WithKeys(key).WillReturns(res)
 }
 
+func mockMissingItem() {
+	res := dynamodb.GetItemOutput{}
+	key := map[string]*dynamodb.AttributeValue{
+		"MegaString": {
+			S: aws.String("missing"),
+		},
+	}
+	mock.ExpectGetItem().ToTable("test-table").WithKeys(key).WillReturns(res)
+}
+
 func TestGetItem(t *testing.T) {
 	mockGetItem()
 	c := testClient(testTableName)
@@ -83,6 +93,18 @@ func TestGetItem(t *testing.T) {
 
 	if !obj.MegaBool {
 		t.Errorf("Expected true, got %t", obj.MegaBool)
+	}
+}
+
+func TestGetMissingItem(t *testing.T) {
+	mockMissingItem()
+	c := testClient("test-table")
+
+	obj := &MegaTest{}
+
+	err := c.GetItem(obj, map[string]interface{}{"MegaString": "missing"})
+	if err == nil || err != ErrNotFound {
+		t.Errorf("Expected ErrNotFound, got %v", err)
 	}
 }
 
