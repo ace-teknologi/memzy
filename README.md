@@ -7,5 +7,94 @@
 
 A simple object persistance inferface for golang.
 
+## Minimum requirements
+
+go 1.13.x
+
+## Usage
+
+Prequisite: add json tags to any objects you want to store.
+```golang
+type Bob {
+    Name string `json:"name"` // in our examples this will be the primary key
+    Height int  `json:"height"`
+}
+```
+
+### DynamoDB client
+
+```golang
+import "github.com/ace-teknologi/memzy/dynamodb"
+
+...
+
+c := dynamodb.New("BOB_STORAGE")
+```
+
+### Memory client
+
+The memory client is good for testing.
+
+```golang
+import "github.com/ace-teknologi/memzy/memory"
+
+...
+
+c := memory.New("name")
+```
+
+### Use the interface
+
+Generally I don't use the above clients directly. Instead I use the interface
+which enables me to switch implementations in testing.
+
+```golang
+import (
+    "os"
+
+    "github.com/ace-teknologi/memzy"
+    "github.com/ace-teknologi/memzy/dynamodb"
+    "github.com/ace-teknologi/memzy/memory"
+)
+
+var memzyClient memzy.memzy
+
+func init() {
+    if os.Getenv == "PRODUCTION" {
+        memzyClient = dynamodb.New("BOB_STORAGE")
+    } else {
+        memzyClient = memory.New("name")
+    }
+}
+
+```
+
+### GetItem
+
+```golang
+var rdj Bob
+memzyClient.GetItem(rdj, map[string]interface{}{"Name": "Robert Downey Jr."})
+fmt.Printf("Robert Downey Jr is %d cm tall", rdj.Height) // Robery Downey Jr. is 173 cm tall
+```
+
+### PutItem
+
+```golang
+var rnm = &Bob{
+    Name: "Robert Nesta Marley, OM",
+    Height: 170,
+}
+memzyClient.PutItem(rnm)
+```
+
+### NewIter
+
+This has basically no features, just the ability to iterate over everything you have stored.
+
+```golang
+iter := memzyClient.NewIter()
+// do stuff
+```
+
 __Warning__: the API of this pre-1.0 library is unstable. It is recommended to use
 dependency management.
