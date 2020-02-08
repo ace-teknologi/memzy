@@ -84,6 +84,18 @@ func TestGetItem(t *testing.T) {
 	}
 }
 
+func TestGetMissingItem(t *testing.T) {
+	mockMissingItem()
+	c := testClient("test-table")
+
+	obj := &MegaTest{}
+
+	err := c.GetItem(obj, map[string]interface{}{"MegaString": "missing"})
+	if err == nil || err != memzy.ErrNotFound {
+		t.Errorf("Expected ErrNotFound, got %v", err)
+	}
+}
+
 func TestPutItem(t *testing.T) {
 	c := testClient("test-table")
 

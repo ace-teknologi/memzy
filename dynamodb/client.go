@@ -3,6 +3,7 @@ package dynamodb
 import (
 	"fmt"
 
+	"github.com/ace-teknologi/memzy"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -43,6 +44,10 @@ func (c *Client) GetItem(v interface{}, key map[string]interface{}) error {
 	out, err := c.Service.GetItem(in)
 	if err != nil {
 		return fmt.Errorf("Could not GetItem from DynamoDB: %v", err)
+	}
+
+	if out.Item == nil {
+		return memzy.ErrNotFound
 	}
 
 	err = dynamodbattribute.UnmarshalMap(out.Item, v)
